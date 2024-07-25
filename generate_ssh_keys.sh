@@ -1,5 +1,5 @@
 #!/bin/bash
-# Auther : Lalatendu K Swain
+# Author: Lalatendu K Swain
 # Path to the file containing usernames
 usernames_file="usernames.txt"
 
@@ -20,17 +20,22 @@ done < "$usernames_file"
 # Set the passphrase
 passphrase="123456789"
 
-# Function to generate SSH key pair with passphrase
+# Function to generate SSH key pair with passphrase and KDF rounds
 generate_ssh_key() {
     local user=$1
     local key_name=$2
 
     echo "Generating SSH key pair for $user"
-    ssh-keygen -t ed25519 -b 4096 -C "Login to Prod Server from $user SYSTEM" -N "$passphrase" -f ~/.ssh/$key_name
+    ssh-keygen -t ed25519 -a 100 -C "Login to Prod Server from $user SYSTEM" -N "$passphrase" -f ~/.ssh/$key_name
+    if [ $? -ne 0 ]; then
+        echo "Failed to generate key for $user"
+    else
+        echo "Key generated successfully for $user"
+    fi
 }
 
 # Main script
 for user in "${users[@]}"; do
-    key_name="${user}_key"
+    key_name="${user}_ed25519_key"
     generate_ssh_key "$user" "$key_name"
 done
